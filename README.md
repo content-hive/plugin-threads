@@ -17,9 +17,3 @@ contenthive.json     # repository metadata for the Content Hive plugin catalog
 ## Disclaimer
 
 > This plugin fetches content via Threads mobile page scraping. Cookie authentication may carry the risk of account suspension. Please ensure compliance with Threads' Terms of Service and applicable local laws before use. Platform policy changes may cause the plugin to stop working.
-
-## Releasing
-
-1. Bump `version` and rewrite `release_notes` in `plugin/manifest.json`.
-2. Merge into `main`.
-3. Publish a GitHub Release whose tag is `v<version>` (for example `v0.1.1`).
