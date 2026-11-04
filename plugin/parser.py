@@ -9,12 +9,16 @@ import aiohttp
 
 from contenthive.plugins.context import PluginContext
 from contenthive.plugins.contracts import (
+    CoverStream,
+    ImageStream,
     MediaType,
     ParserAuthorInfo,
     ParserMediaInfo,
     ParserPlatformInfo,
     ParserResult,
     ParserResultStatus,
+    VideoStream,
+    source_key_from_url,
 )
 
 from .const import (
@@ -203,21 +207,28 @@ class ThreadsParser:
         if video_versions:
             video = video_versions[0]
             cover = self._best_image_url(item.get("image_versions2") or {})
+            width = item.get("original_width")
+            height = item.get("original_height")
+            streams: list = [VideoStream(urls=[video["url"]], width=width, height=height)]
+            if cover:
+                streams.append(CoverStream(urls=[cover]))
             return ParserMediaInfo(
-                url=video["url"],
+                source_key=source_key_from_url(video["url"]),
                 type=MediaType.VIDEO,
-                cover=cover,
-                duration=None,
-                width=item.get("original_width"),
-                height=item.get("original_height"),
+                width=width,
+                height=height,
+                streams=streams,
             )
         img_url = self._best_image_url(item.get("image_versions2") or {})
         if img_url:
+            width = item.get("original_width")
+            height = item.get("original_height")
             return ParserMediaInfo(
-                url=img_url,
+                source_key=source_key_from_url(img_url),
                 type=MediaType.IMAGE,
-                width=item.get("original_width"),
-                height=item.get("original_height"),
+                width=width,
+                height=height,
+                streams=[ImageStream(urls=[img_url], width=width, height=height)],
             )
         return None
 
@@ -236,26 +247,33 @@ class ThreadsParser:
             if video_versions:
                 video = video_versions[0]
                 cover = self._best_image_url(media.get("image_versions2") or {})
+                width = media.get("original_width")
+                height = media.get("original_height")
+                streams: list = [VideoStream(urls=[video["url"]], width=width, height=height)]
+                if cover:
+                    streams.append(CoverStream(urls=[cover]))
                 result.append(
                     ParserMediaInfo(
-                        url=video["url"],
+                        source_key=source_key_from_url(video["url"]),
                         type=MediaType.VIDEO,
-                        cover=cover,
-                        duration=None,
-                        width=media.get("original_width"),
-                        height=media.get("original_height"),
+                        width=width,
+                        height=height,
+                        streams=streams,
                     )
                 )
         else:
             # Single image (media_type == 1) or unknown
             img_url = self._best_image_url(media.get("image_versions2") or {})
             if img_url:
+                width = media.get("original_width")
+                height = media.get("original_height")
                 result.append(
                     ParserMediaInfo(
-                        url=img_url,
+                        source_key=source_key_from_url(img_url),
                         type=MediaType.IMAGE,
-                        width=media.get("original_width"),
-                        height=media.get("original_height"),
+                        width=width,
+                        height=height,
+                        streams=[ImageStream(urls=[img_url], width=width, height=height)],
                     )
                 )
 
